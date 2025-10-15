@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leo - Seu Assistente de IA no WhatsApp</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, sans-serif;
+        background: #000000;
+        color: #ffffff;
+        overflow-x: hidden;
+      }
+
+      .grain {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.03;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        z-index: 1;
+      }
+
+      .hero {
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(37, 211, 102, 0.1) 0%,
+          transparent 50%
+        );
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            90deg,
+            rgba(37, 211, 102, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(rgba(37, 211, 102, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: gridMove 20s linear infinite;
+      }
+
+      @keyframes gridMove {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(50px, 50px);
+        }
+      }
+
+      .hero-content {
+        max-width: 1400px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        text-align: center;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.6rem 1.5rem;
+        background: rgba(37, 211, 102, 0.1);
+        border: 1px solid rgba(37, 211, 102, 0.3);
+        border-radius: 50px;
+        color: #25d366;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      h1 {
+        font-size: 5rem;
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #25d366 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        font-size: 1.5rem;
+        color: #999;
+        margin-bottom: 3rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+      }
+
+      .cta-container {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 4rem;
+      }
+
+      .cta-primary {
+        padding: 1.3rem 3rem;
+        background: #25d366;
+        color: #000;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .cta-primary::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .cta-primary:hover::before {
+        left: 100%;
+      }
+
+      .cta-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 60px rgba(37, 211, 102, 0.4);
+      }
+
+      .price-display {
+        font-size: 1.2rem;
+        color: #666;
+      }
+
+      .price-display span {
+        color: #25d366;
+        font-weight: 800;
+        font-size: 1.5rem;
+      }
+
+      .terminal-mockup {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(10, 10, 10, 0.8);
+        border: 1px solid rgba(37, 211, 102, 0.2);
+        border-radius: 16px;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .terminal-header {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(37, 211, 102, 0.1);
+      }
+
+      .terminal-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #666;
+      }
+
+      .terminal-dot:nth-child(1) {
+        background: #ff5f56;
+      }
+      .terminal-dot:nth-child(2) {
+        background: #ffbd2e;
+      }
+      .terminal-dot:nth-child(3) {
+        background: #27c93f;
+      }
+
+      .terminal-body {
+        padding: 2rem;
+        font-family: "Courier New", monospace;
+        font-size: 1rem;
+      }
+
+      .terminal-line {
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: terminalType 0.5s forwards;
+      }
+
+      .terminal-line:nth-child(1) {
+        animation-delay: 0.5s;
+      }
+      .terminal-line:nth-child(2) {
+        animation-delay: 1s;
+      }
+      .terminal-line:nth-child(3) {
+        animation-delay: 1.5s;
+      }
+      .terminal-line:nth-child(4) {
+        animation-delay: 2s;
+      }
+
+      @keyframes terminalType {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .prompt {
+        color: #25d366;
+      }
+
+      .command {
+        color: #fff;
+      }
+
+      .output {
+        color: #999;
+        margin-left: 2rem;
+        margin-top: 0.5rem;
+      }
+
+      .features-section {
+        padding: 8rem 2rem;
+        position: relative;
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 5rem;
+      }
+
+      .section-title {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+      }
+
+      .section-subtitle {
+        font-size: 1.2rem;
+        color: #666;
+      }
+
+      .features-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background: linear-gradient(
+          135deg,
+          rgba(37, 211, 102, 0.05),
+          rgba(37, 211, 102, 0.02)
+        );
+        border: 1px solid rgba(37, 211, 102, 0.2);
+        border-radius: 20px;
+        padding: 3rem;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(37, 211, 102, 0.1),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+
+      .feature-card:hover::before {
+        opacity: 1;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px);
+        border-color: #25d366;
+        box-shadow: 0 30px 80px rgba(37, 211, 102, 0.2);
+      }
+
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        display: block;
+      }
+
+      .feature-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: #25d366;
+      }
+
+      .feature-description {
+        color: #999;
+        line-height: 1.7;
+      }
+
+      .testimonials {
+        padding: 8rem 2rem;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(37, 211, 102, 0.05) 0%,
+          transparent 70%
+        );
+      }
+
+      .testimonials-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+
+      .testimonial-card {
+        background: rgba(10, 10, 10, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .testimonial-text {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+        color: #ccc;
+      }
+
+      .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .author-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366, #1fb855);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .author-info h4 {
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .author-info p {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .cta-final {
+        padding: 8rem 2rem;
+        text-align: center;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          rgba(37, 211, 102, 0.05)
+        );
+      }
+
+      .cta-final h2 {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+      }
+
+      .cta-final p {
+        font-size: 1.3rem;
+        color: #999;
+        margin-bottom: 3rem;
+      }
+
+      .pricing-box {
+        display: inline-block;
+        background: rgba(37, 211, 102, 0.1);
+        border: 2px solid #25d366;
+        border-radius: 20px;
+        padding: 3rem 4rem;
+        margin-bottom: 2rem;
+      }
+
+      .pricing-value {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #25d366;
+        margin-bottom: 1rem;
+      }
+
+      .pricing-period {
+        color: #666;
+        font-size: 1.2rem;
+      }
+
+      .benefits-list {
+        display: inline-block;
+        text-align: left;
+        margin-top: 2rem;
+      }
+
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+      }
+
+      .check-icon {
+        width: 24px;
+        height: 24px;
+        background: #25d366;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-weight: 900;
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 3rem;
+        }
+
+        .features-grid,
+        .testimonials-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .cta-container {
+          flex-direction: column;
+        }
+
+        .terminal-body {
+          font-size: 0.8rem;
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grain"></div>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="badge">🦁 Leo - Inteligência Artificial no WhatsApp</div>
+        <h1>Seu Assistente<br />Pessoal Inteligente</h1>
+        <p class="subtitle">
+          Controle financeiro, agenda inteligente e lembretes automáticos. Tudo
+          conversando naturalmente pelo WhatsApp.
+        </p>
+
+        <div class="cta-container">
+          <a href="#" class="cta-primary">Começar Agora</a>
+          <div class="price-display">Apenas <span>R$ 29,90</span>/mês</div>
+        </div>
+      </div>
+    </section>
+    <section class="live-demo">
+      <div class="live-demo-container">
+        <div class="section-header">
+          <h2 class="section-title">Leo ao Vivo</h2>
+          <p class="section-subtitle">
+            Veja uma conversa real com o assistente
+          </p>
+        </div>
+
+        <div class="demo-phone">
+          <div class="phone-bezel">
+            <div class="phone-camera"></div>
+          </div>
+          <div class="phone-display">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="status-icons">
+                <span>📶</span>
+                <span>📡</span>
+                <span>🔋</span>
+              </div>
+            </div>
+
+            <div class="chat-header">
+              <div class="chat-back">‹</div>
+              <div class="chat-avatar">🦁</div>
+              <div class="chat-info">
+                <div class="chat-name">Leo</div>
+                <div class="chat-status">digitando...</div>
+              </div>
+              <div class="chat-actions">⋮</div>
+            </div>
+
+            <div class="chat-body" id="liveChatBody">
+              <div class="date-divider">HOJE</div>
+            </div>
+
+            <div class="chat-input-area">
+              <div class="chat-input-box">
+                <span class="input-icon">😊</span>
+                <span class="input-text">Mensagem</span>
+                <span class="input-icon">📎</span>
+                <span class="input-icon-send">🎤</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      .live-demo {
+        padding: 8rem 2rem;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .live-demo::before {
+        content: "";
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(37, 211, 102, 0.1) 0%,
+          transparent 70%
+        );
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 4s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0.5;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 0.8;
+        }
+      }
+
+      .live-demo-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+      }
+
+      .demo-phone {
+        max-width: 420px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .phone-bezel {
+        background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+        border-radius: 45px;
+        padding: 15px;
+        box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8),
+          inset 0 1px 2px rgba(255, 255, 255, 0.1);
+        border: 2px solid #2a2a2a;
+      }
+
+      .phone-camera {
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 25px;
+        background: #000;
+        border-radius: 0 0 15px 15px;
+        z-index: 10;
+      }
+
+      .phone-camera::before {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #1a1a1a;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .phone-display {
+        background: #0b141a;
+        border-radius: 35px;
+        overflow: hidden;
+        height: 720px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .status-bar {
+        padding: 2.5rem 1.5rem 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      .status-icons {
+        display: flex;
+        gap: 0.3rem;
+      }
+
+      .chat-header {
+        background: #1f2c33;
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .chat-back {
+        color: #25d366;
+        font-size: 2rem;
+        font-weight: 300;
+      }
+
+      .chat-avatar {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #25d366, #1fb855);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .chat-info {
+        flex: 1;
+      }
+
+      .chat-name {
+        color: #e9edef;
+        font-weight: 600;
+        font-size: 1.05rem;
+      }
+
+      .chat-status {
+        color: #25d366;
+        font-size: 0.8rem;
+      }
+
+      .chat-actions {
+        color: #8696a0;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .chat-body {
+        flex: 1;
+        padding: 1.5rem 1rem;
+        overflow-y: auto;
+        background: #0b141a;
+        background-image: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(37, 211, 102, 0.01) 10px,
+          rgba(37, 211, 102, 0.01) 20px
+        );
+      }
+
+      .date-divider {
+        text-align: center;
+        color: #8696a0;
+        font-size: 0.7rem;
+        background: #1f2c33;
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .chat-message {
+        max-width: 80%;
+        padding: 0.7rem 0.9rem;
+        margin-bottom: 0.6rem;
+        border-radius: 8px;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        animation: messageAppear 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        opacity: 0;
+        animation-fill-mode: forwards;
+        position: relative;
+      }
+
+      .chat-message-user {
+        background: #005c4b;
+        color: #e9edef;
+        margin-left: auto;
+        border-radius: 8px 8px 2px 8px;
+      }
+
+      .chat-message-leo {
+        background: #1f2c33;
+        color: #e9edef;
+        margin-right: auto;
+        border-radius: 8px 8px 8px 2px;
+      }
+
+      .message-time {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 0.3rem;
+        text-align: right;
+      }
+
+      @keyframes messageAppear {
+        0% {
+          opacity: 0;
+          transform: scale(0.8) translateY(15px);
+        }
+        60% {
+          transform: scale(1.02) translateY(0);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .typing-indicator {
+        background: #1f2c33;
+        padding: 1rem;
+        border-radius: 8px 8px 8px 2px;
+        display: inline-flex;
+        gap: 0.4rem;
+        margin-right: auto;
+        margin-bottom: 0.6rem;
+        animation: messageAppear 0.4s ease forwards;
+      }
+
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: #8696a0;
+        border-radius: 50%;
+        animation: typingBounce 1.4s infinite;
+      }
+
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes typingBounce {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-8px);
+        }
+      }
+
+      .chat-input-area {
+        background: #1f2c33;
+        padding: 0.6rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .chat-input-box {
+        background: #2a3942;
+        border-radius: 25px;
+        padding: 0.7rem 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .input-icon {
+        font-size: 1.2rem;
+        opacity: 0.7;
+      }
+
+      .input-text {
+        flex: 1;
+        color: #8696a0;
+        font-size: 0.95rem;
+      }
+
+      .input-icon-send {
+        font-size: 1.3rem;
+      }
+
+      @media (max-width: 768px) {
+        .demo-phone {
+          max-width: 100%;
+        }
+      }
+    </style>
+
+    <script>
+      const liveConversation = [
+        {
+          type: "user",
+          text: "Oi Leo! Gastei R$ 120 na farmácia",
+          time: "14:23",
+          delay: 1000,
+        },
+        { type: "typing", delay: 2800 },
+        {
+          type: "leo",
+          text: "✅ Registrado com sucesso!\n\nDespesa: R$ 120,00\nCategoria: Saúde\nData: Hoje, 14:23",
+          time: "14:23",
+          delay: 4500,
+        },
+        {
+          type: "leo",
+          text: "💡 Você já gastou R$ 340 em Saúde este mês. Isso representa 8% do seu orçamento mensal.",
+          time: "14:23",
+          delay: 6500,
+        },
+        {
+          type: "user",
+          text: "Legal! Me mostra um resumo da semana",
+          time: "14:24",
+          delay: 9000,
+        },
+        { type: "typing", delay: 10800 },
+        {
+          type: "leo",
+          text: "📊 Resumo Semanal (28/Set - 03/Out)\n\n💰 Total gasto: R$ 892\n\n📈 Distribuição:\n• Alimentação: R$ 356 (40%)\n• Transporte: R$ 178 (20%)\n• Saúde: R$ 340 (38%)\n• Outros: R$ 18 (2%)",
+          time: "14:24",
+          delay: 12500,
+        },
+        {
+          type: "leo",
+          text: "🎯 Você está 18% abaixo da meta semanal! Continue assim! 🚀",
+          time: "14:24",
+          delay: 14500,
+        },
+        {
+          type: "user",
+          text: "Ótimo! Lembra de pagar Netflix amanhã",
+          time: "14:25",
+          delay: 17000,
+        },
+        { type: "typing", delay: 18800 },
+        {
+          type: "leo",
+          text: '📅 Lembrete criado!\n\n"Pagar Netflix"\n🗓️ Amanhã, 04/Out\n⏰ 10:00\n\nVou te avisar 1 hora antes! 😊',
+          time: "14:25",
+          delay: 20500,
+        },
+      ];
+
+      let liveIndex = 0;
+      const liveChatContainer = document.getElementById("liveChatBody");
+      const dateDiv = liveChatContainer.querySelector(".date-divider");
+      const chatStatus = document.querySelector(".chat-status");
+
+      function showLiveMessage() {
+        if (liveIndex >= liveConversation.length) {
+          setTimeout(() => {
+            liveChatContainer.innerHTML =
+              '<div class="date-divider">HOJE</div>';
+            liveIndex = 0;
+            chatStatus.textContent = "online";
+            setTimeout(showLiveMessage, 3000);
+          }, 5000);
+          return;
+        }
+
+        const msg = liveConversation[liveIndex];
+
+        if (msg.type === "typing") {
+          chatStatus.textContent = "digitando...";
+          const typingDiv = document.createElement("div");
+          typingDiv.className = "typing-indicator";
+          typingDiv.innerHTML =
+            '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+          liveChatContainer.appendChild(typingDiv);
+          liveChatContainer.scrollTop = liveChatContainer.scrollHeight;
+
+          liveIndex++;
+          setTimeout(() => {
+            typingDiv.remove();
+            chatStatus.textContent = "online";
+            showLiveMessage();
+          }, liveConversation[liveIndex].delay - msg.delay);
+          return;
+        }
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `chat-message chat-message-${msg.type}`;
+        messageDiv.style.whiteSpace = "pre-line";
+
+        const textSpan = document.createElement("div");
+        textSpan.textContent = msg.text;
+
+        const timeSpan = document.createElement("div");
+        timeSpan.className = "message-time";
+        timeSpan.textContent = msg.time;
+
+        messageDiv.appendChild(textSpan);
+        messageDiv.appendChild(timeSpan);
+
+        liveChatContainer.appendChild(messageDiv);
+        liveChatContainer.scrollTop = liveChatContainer.scrollHeight;
+
+        liveIndex++;
+
+        if (liveIndex < liveConversation.length) {
+          setTimeout(
+            showLiveMessage,
+            liveConversation[liveIndex].delay - msg.delay
+          );
+        } else {
+          setTimeout(showLiveMessage, 5000);
+        }
+      }
+
+      setTimeout(showLiveMessage, 2000);
+    </script>
+
+    <section class="features-section">
+      <div class="section-header">
+        <h2 class="section-title">Recursos Avançados</h2>
+        <p class="section-subtitle">
+          Tecnologia de ponta para simplificar sua vida
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">💰</span>
+          <h3 class="feature-title">Gestão Financeira</h3>
+          <p class="feature-description">
+            Registre gastos e receitas conversando naturalmente. Receba
+            relatórios automáticos e insights personalizados.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📅</span>
+          <h3 class="feature-title">Agenda Inteligente</h3>
+          <p class="feature-description">
+            Crie lembretes e compromissos. O assistente te avisa no momento
+            perfeito para não perder nada importante.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🤖</span>
+          <h3 class="feature-title">IA Conversacional</h3>
+          <p class="feature-description">
+            Linguagem natural e contexto. Converse como se estivesse falando com
+            um amigo.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📊</span>
+          <h3 class="feature-title">Relatórios Visuais</h3>
+          <p class="feature-description">
+            Gráficos e dashboards automáticos com insights sobre seus hábitos e
+            progresso.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔒</span>
+          <h3 class="feature-title">Segurança Total</h3>
+          <p class="feature-description">
+            Criptografia de ponta a ponta. Seus dados são privados e nunca
+            compartilhados.
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">⚡</span>
+          <h3 class="feature-title">Respostas Instantâneas</h3>
+          <p class="feature-description">
+            IA ultrarrápida que responde em segundos. Disponível 24 horas por
+            dia, 7 dias por semana.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonials">
+      <div class="section-header">
+        <h2 class="section-title">O que dizem nossos usuários</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <p class="testimonial-text">
+            "Nunca mais esqueci de pagar uma conta. O assistente me avisa de
+            tudo e ainda me ajuda a economizar. Melhor investimento de R$ 29,90
+            que já fiz!"
+          </p>
+          <div class="testimonial-author">
+            <div class="author-avatar">👨</div>
+            <div class="author-info">
+              <h4>Ricardo Silva</h4>
+              <p>Empresário</p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">
+            "Simples e eficiente. Uso todos os dias e minha vida ficou muito
+            mais organizada. A IA realmente entende o que eu falo!"
+          </p>
+          <div class="testimonial-author">
+            <div class="author-avatar">👩</div>
+            <div class="author-info">
+              <h4>Ana Costa</h4>
+              <p>Designer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <h2>Comece hoje mesmo</h2>
+      <p>
+        Junte-se a milhares de pessoas que já transformaram sua produtividade
+      </p>
+
+      <div class="pricing-box">
+        <div class="pricing-value">R$ 29,90</div>
+        <div class="pricing-period">por mês</div>
+      </div>
+
+      <a href="#" class="cta-primary">Assinar Agora</a>
+
+      <div class="benefits-list">
+        <div class="benefit-item">
+          <span class="check-icon">✓</span>
+          <span>Cancele quando quiser</span>
+        </div>
+        <div class="benefit-item">
+          <span class="check-icon">✓</span>
+          <span>Suporte 24/7</span>
+        </div>
+        <div class="benefit-item">
+          <span class="check-icon">✓</span>
+          <span>Atualizações gratuitas</span>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
